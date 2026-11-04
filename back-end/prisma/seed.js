@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker/locale/pt_BR'
 import { PrismaClient } from '@prisma/client'
+import { hashPassword } from '../src/utils/security.js'
 
 const prisma = new PrismaClient();
 
@@ -29,6 +30,8 @@ async function main() {
   const users = [];
   const numberOfUsers = 4;
 
+  const adminPasswordHash = await hashPassword('Vulcom@DSM')
+
  // Cria o administrador somente se o e-mail ainda não existir
   const user = await prisma.user.upsert({
     where: {
@@ -39,13 +42,15 @@ async function main() {
       fullname: 'Administrador do Sistema',
       username: 'admin',
       email: 'admin@vulcom.com.br',
-      password: 'Vulcom@DSM',
+      password: adminPasswordHash,
       is_admin: true
     }
   })
 
   users.push(user)
-  
+
+  const defaultPasswordHash = await hashPassword('senha123')
+
   for (let i = 0; i < numberOfUsers; i++) {
     const user = await prisma.user.create({
       data: {
@@ -53,7 +58,7 @@ async function main() {
         username: faker.internet.username(),
         email: faker.internet.email(),
         // OWASP Top 10:2025 A07 - Falhas de Autenticação: senha fraca e compartilhada entre contas.
-        password: 'senha123',
+        password: defaultPasswordHash,
         is_admin: i === 0,
       },
     });

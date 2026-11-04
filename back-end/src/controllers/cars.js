@@ -1,4 +1,5 @@
 import prisma from '../database/client.js'
+import { publicUserSelect } from '../utils/security.js'
 
 const controller = {}     // Objeto vazio
 
@@ -38,10 +39,8 @@ controller.retrieveAll = async function(req, res) {
       ],
       include: {
         customer: includedRels.includes('customer'),
-        // OWASP Top 10:2025 A01 - Falha no Controle de Acesso:
-        // incluir usuários retorna todos os seus campos, inclusive password em texto puro (A04).
-        created_user: includedRels.includes('created_user'),
-        updated_user: includedRels.includes('updated_user')
+        created_user: includedRels.includes('created_user') ? { select: publicUserSelect } : false,
+        updated_user: includedRels.includes('updated_user') ? { select: publicUserSelect } : false
       }
     })
 
@@ -65,10 +64,8 @@ controller.retrieveOne = async function(req, res) {
       where: { id: Number(req.params.id) },
       include: {
         customer: includedRels.includes('customer'),
-        // OWASP Top 10:2025 A01 - Falha no Controle de Acesso:
-        // a consulta individual também expõe password dos usuários relacionados (A04).
-        created_user: includedRels.includes('created_user'),
-        updated_user: includedRels.includes('updated_user')
+        created_user: includedRels.includes('created_user') ? { select: publicUserSelect } : false,
+        updated_user: includedRels.includes('updated_user') ? { select: publicUserSelect } : false
       }
     })
 
