@@ -30,14 +30,14 @@ export default function SqliChallenge() {
 
   return <Stack spacing={3}>
     <Typography variant="h1">Desafio: SQL Injection</Typography>
-    <Alert severity="warning">
-      A consulta de login concatena os valores enviados de propósito. Use somente dados de laboratório.
+    <Alert severity="info">
+      A consulta de login utiliza parâmetros, impedindo a injeção de SQL.
     </Alert>
     {error && <Alert severity="error">{error}</Alert>}
     {result && <Alert severity={result.success ? 'success' : 'info'}>
-      {result.message}{result.flag ? ` Flag: ${result.flag}` : ''}
+      {result.message}
     </Alert>}
-    {result?.flag && <Paper sx={{ p: 3, overflow: 'auto' }}>
+    {result?.result?.length > 0 && <Paper sx={{ p: 3, overflow: 'auto' }}>
       <Typography variant="h2" sx={{ fontSize: '1.5rem' }}>Resultado da consulta</Typography>
       <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
         {JSON.stringify(result.result, null, 2)}

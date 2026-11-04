@@ -1,4 +1,5 @@
 import prisma from '../database/client.js'
+import { hashPassword, verifyPassword, isArgon2Hash } from '../utils/security.js'
 
 const controller = {}
 
@@ -6,46 +7,59 @@ controller.login = async function(req, res) {
   const username = req.body?.username ?? ''
   const password = req.body?.password ?? ''
 
-  // DESAFIO: esta concatenação é intencionalmente vulnerável a SQL Injection.
-  // Não reutilizar este padrão em código de produção.
-  // OWASP Top 10:2025 A05 - Injeção (SQL Injection):
-  // entradas concatenadas ao SQL são executadas por $queryRawUnsafe como parte da consulta.
-  const query = `SELECT * FROM "User" WHERE username = '${username}' AND password = '${password}'`
-
-  // OWASP Top 10:2025 A09 - Falhas nos Logs de Segurança e no Sistema de Alertas:
-  // a consulta registrada contém as credenciais informadas, incluindo a senha.
-  console.log('****** INSECURE SQL:', query)
-
   try {
-    const users = await prisma.$queryRawUnsafe(query)
+    const users = await prisma.$queryRaw`
+      SELECT id, fullname, username, email, is_admin, password
+      FROM "User"
+      WHERE username = ${username}
+    `
 
-    if(users.length > 0) {
-      return res.send({
-        success: true,
-        message: `Bem-vindo, ${username}!`,
-        flag: 'VULCOM{SQLi_Exploit_Success}',
-        // OWASP Top 10:2025 A01 - Falha no Controle de Acesso:
-        // SELECT * expõe todos os campos encontrados, inclusive senhas em texto puro (A04).
-        result: users,
-        query
+    if(users.length === 0) {
+      return res.status(401).send({
+        success: false,
+        message: 'Login falhou!',
+        result: []
       })
     }
 
-    res.status(401).send({
-      success: false,
-      message: 'Login falhou!',
-      result: users,
-      query
+    const user = users[0]
+    let passwordIsValid = false
+
+    if(isArgon2Hash(user.password)) {
+      passwordIsValid = await verifyPassword(user.password, password)
+    }
+    else {
+      passwordIsValid = user.password === password
+      if(passwordIsValid) {
+        const hashedPassword = await hashPassword(password)
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { password: hashedPassword }
+        })
+      }
+    }
+
+    if(! passwordIsValid) {
+      return res.status(401).send({
+        success: false,
+        message: 'Login falhou!',
+        result: []
+      })
+    }
+
+    const { password: _, ...safeUser } = user
+
+    res.send({
+      success: true,
+      message: `Bem-vindo, ${username}!`,
+      result: [safeUser]
     })
   }
   catch(error) {
     console.error(error)
-    // OWASP Top 10:2025 A10 - Tratamento Inadequado de Condições Excepcionais:
-    // a resposta de erro revela a consulta SQL e a estrutura interna da tabela.
     res.status(500).send({
       success: false,
-      message: 'Erro no servidor',
-      query
+      message: 'Erro no servidor'
     })
   }
 }
