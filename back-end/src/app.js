@@ -16,20 +16,9 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 import cors from 'cors'
 
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS.split(','),
+  origin: allowedOrigins,
   // credentials: true
 }))
-
-app.use((req, res, next) => {
-  const origin = req.headers.origin
-  if(origin && allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin)
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-  }
-  if(req.method === 'OPTIONS') return res.status(204).end()
-  next()
-})
 
 // (...código existente...)
 
