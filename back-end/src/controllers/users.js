@@ -178,4 +178,19 @@ controller.me = function(req, res) {
   res.send(req?.authUser)
 }
 
+/* ATIVIDADE 14/11 - Logout pelo back-end
+ * Apaga o cookie de autenticação usando res.clearCookie, com as mesmas
+ * opções relevantes utilizadas na criação do cookie em controller.login.
+ */
+controller.logout = function(req, res) {
+  res.clearCookie(process.env.AUTH_COOKIE_NAME, {
+    path: '/',
+    secure: true,
+    sameSite: 'None'
+  })
+
+  // HTTP 204: No Content
+  res.status(204).end()
+}
+
 export default controller

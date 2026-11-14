@@ -11,6 +11,7 @@ const router = Router()
 // /:id, para impedir que /me seja capturado indevidamente por /:id.
 router.post('/login', controller.login)
 router.get('/me', controller.me)
+router.post('/logout', controller.logout)
 
 router.post('/', controller.create)
 router.get('/', controller.retrieveAll)

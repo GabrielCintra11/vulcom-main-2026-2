@@ -33,6 +33,22 @@ app.use(cookieParser())
 
 /*********** ROTAS DA API **************/
 
+// ATIVIDADE 14/11 - Demonstração didática de cookies:
+// grava um cookie comum (não HTTP-only) chamado "cookie-js" em todas as
+// respostas da API. Por NÃO ser HTTP-only, ele fica visível ao JavaScript
+// do front-end via document.cookie — em contraste com o cookie de
+// autenticação, que é HTTP-only e invisível ao JS.
+// É totalmente independente do cookie de autenticação (AUTH_COOKIE_NAME).
+app.use((req, res, next) => {
+  res.cookie('cookie-js', 'Cookie acessível via JavaScript', {
+    httpOnly: false, // Acessível via document.cookie (proposta da demonstração)
+    secure: true,    // Enviado apenas em conexões seguras (localhost é aceito)
+    sameSite: 'None',
+    path: '/'
+  })
+  next()
+})
+
 // Middleware de autenticação JWT: aplica-se a todas as rotas da API.
 // A única exceção pública é POST /users/login (ver middleware/auth.js).
 import auth from './middleware/auth.js'

@@ -21,16 +21,28 @@ export default function AuthControl() {
 
   async function handleLogoutButtonClick() {
     if(await askForConfirmation('Deseja realmente sair?')) {
-      // OWASP Top 10:2025 A07 - Falhas de Autenticação:
-      // o logout só remove a cópia local; não revoga o JWT nem encerra o cookie no servidor.
-      // Apaga o token do localStorage
-      window.localStorage.removeItem(import.meta.env.VITE_AUTH_TOKEN_NAME)
+      showWaiting(true)
+      try {
+        /* ATIVIDADE 14/11 - Logout pelo back-end:
+         * solicita ao back-end que apague o cookie de autenticação
+         * HTTP-only (impossível de remover via JavaScript).
+         */
+        await myfetch.post('/users/logout')
 
-      // Remove as informações do usuário autenticado
-      setAuthUser(null)
+        // Remove as informações do usuário autenticado
+        setAuthUser(null)
 
-      // Redireciona para a página de login
-      navigate('/login')
+        // Redireciona para a página de login
+        navigate('/login')
+      }
+      catch(error) {
+        // Não finge que o logout foi realizado em caso de erro
+        console.error(error)
+        notify(error.message, 'error')
+      }
+      finally {
+        showWaiting(false)
+      }
     }
   }
 
