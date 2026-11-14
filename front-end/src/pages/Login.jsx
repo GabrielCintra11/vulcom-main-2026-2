@@ -63,15 +63,10 @@ export default function Login() {
       // console.log({ loginData })
 
       // Envia email e password para o back-end para fazer autenticação
+      // A partir da atividade 11/11, o back-end responde gravando um
+      // cookie HTTP-only. O token NÃO é mais armazenado no Local Storage:
+      // o navegador o envia automaticamente nas requisições protegidas.
       const response = await myfetch.post('/users/login', loginData)
-
-      // OWASP Top 10:2025 A07 - Falhas de Autenticação:
-      // o token em localStorage fica acessível ao JavaScript executado por um XSS (A05).
-      // Armazena o token retornado no localStorage (INSEGURO!)
-      window.localStorage.setItem(
-          import.meta.env.VITE_AUTH_TOKEN_NAME,
-          response.token
-      )
 
       // Armazena as informações do usuário autenticado
       setAuthUser(response.user)

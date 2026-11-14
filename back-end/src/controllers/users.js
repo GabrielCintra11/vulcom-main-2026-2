@@ -158,7 +158,7 @@ controller.login = async function(req, res) {
         secure: true,   // O cookie será criptografado em conexões https
         sameSite: 'None',
         path: '/',
-        maxAge: 24 * 60 * 60 * 100  // 24h
+        maxAge: 24 * 60 * 60 * 1000 // 24h
       })
 
       res.send({ token, user: authUser })

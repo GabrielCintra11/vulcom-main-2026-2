@@ -3,9 +3,12 @@
  *
  * - A única rota pública da API é POST /users/login; todas as demais
  *   exigem um token JWT válido.
- * - O token deve ser enviado no cabeçalho Authorization, no formato
- *   "Authorization: Bearer TOKEN" (compatível com Postman, Insomnia
- *   e EchoAPI).
+ * - ATIVIDADE 11/11: o token é procurado PRIMEIRO no cookie de
+ *   autenticação HTTP-only (AUTH_COOKIE_NAME), enviado automaticamente
+ *   pelo navegador.
+ * - Se não houver cookie, aceita o cabeçalho Authorization no formato
+ *   "Authorization: Bearer TOKEN" (compatibilidade com Postman,
+ *   Insomnia e EchoAPI).
  * - Tokens ausentes, inválidos ou expirados retornam HTTP 403: Forbidden.
  * - Os dados do usuário autenticado ficam disponíveis nos controllers
  *   em req.authUser.
@@ -26,13 +29,18 @@ export default function auth(req, res, next) {
     route => req.method === route.method && req.path === route.path
   )) return next()
 
-  // Recupera o token do cabeçalho "Authorization: Bearer TOKEN"
-  const authHeader = req.headers.authorization
-  const token = authHeader?.startsWith('Bearer ')
-    ? authHeader.slice('Bearer '.length)
-    : undefined
+  // 1) Procura primeiro o token no cookie de autenticação HTTP-only
+  let token = req.cookies?.[process.env.AUTH_COOKIE_NAME]
 
-  // Token ausente ~> HTTP 403: Forbidden
+  // 2) Se não houver cookie, procura no cabeçalho "Authorization: Bearer TOKEN"
+  if(! token) {
+    const authHeader = req.headers.authorization
+    token = authHeader?.startsWith('Bearer ')
+      ? authHeader.slice('Bearer '.length)
+      : undefined
+  }
+
+  // Token ausente em ambos os locais ~> HTTP 403: Forbidden
   if(! token) return res.status(403).end()
 
   let payload

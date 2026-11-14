@@ -17,10 +17,10 @@ import cors from 'cors'
 
 app.use(cors({
   origin: allowedOrigins,
-  // credentials: true
+  // Permite o envio e o recebimento de cookies nas requisições cross-origin
+  // (necessário para o cookie de autenticação HTTP-only)
+  credentials: true
 }))
-
-// (...código existente...)
 
 // OWASP Top 10:2025 A09 - Falhas nos Logs de Segurança e no Sistema de Alertas:
 // o log HTTP não registra autor e mudanças de privilégios nem gera alertas de abuso.

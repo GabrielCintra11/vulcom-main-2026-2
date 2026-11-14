@@ -24,16 +24,18 @@ function getOptions(body = null, method = 'GET') {
   const options = {
     method,
     headers: {"Content-type": "application/json; charset=UTF-8"},
-    //  credentials: 'include'  // Instrui o back-end a gravar cookies no front
+    // Instrui o navegador a enviar e receber cookies (incl. cross-origin),
+    // garantindo que o cookie HTTP-only de autenticação seja enviado
+    // automaticamente em todas as requisições
+    credentials: 'include'
   }
 
   if(body) options.body = JSON.stringify(body)
 
-  // Verifica se existe um token gravado no localStorage e o inclui
-  // nos headers, nesse caso
-  const token = window.localStorage.getItem(import.meta.env.VITE_AUTH_TOKEN_NAME)
-
-  if(token) options.headers.authorization = `Bearer ${token}`
+  // ATIVIDADE 11/11: o token JWT não é mais lido do Local Storage.
+  // A autenticação passa a depender exclusivamente do cookie HTTP-only,
+  // inacessível ao JavaScript. Para clientes HTTP (Postman, Insomnia,
+  // EchoAPI), continua valendo o cabeçalho Authorization: Bearer TOKEN.
 
   return options
 }
