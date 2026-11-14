@@ -33,6 +33,11 @@ app.use(cookieParser())
 
 /*********** ROTAS DA API **************/
 
+// Middleware de autenticação JWT: aplica-se a todas as rotas da API.
+// A única exceção pública é POST /users/login (ver middleware/auth.js).
+import auth from './middleware/auth.js'
+app.use(auth)
+
 import carsRouter from './routes/cars.js'
 app.use('/cars', carsRouter)
 
